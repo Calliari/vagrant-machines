@@ -38,6 +38,39 @@ git push
   1. vagrant software ===> https://www.vagrantup.com/downloads.html
   2. virtualbox ===> https://www.virtualbox.org/wiki/Downloads
   
-  ##
+  ## clone this repo to start working in the VM
+  
+  ```
+  git clone https://github.com/Calliari/vagrant-docker.git
+  ```
+
+## Spin up the VM
+The VM will install docker and some other packages
+
+```
+vagrant up
+```
+
+## After the VM finish the all the installtions do
+
+pulling the docker container from my docker hub
+```
+sudo docker pull caliari/ubuntu-apache
+```
+
+### Find out the image ID with the following CMD
+
+```sudo docker images
+```
+
+### Run the docker container after pulling it
+
+```
+sudo docker run --net=host -d -t container ID
+```
 
 
+## Just folow the instruction on my Docker hub to use this docker container with apache server
+```
+https://hub.docker.com/r/caliari/ubuntu-apache/
+```
