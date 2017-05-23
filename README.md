@@ -65,14 +65,40 @@ sudo docker pull caliari/ubuntu-apache
 sudo docker images
 ```
 
-### Run the docker container after pulling it
+### Run the docker image after pulling it
 
 ```
-sudo docker run --net=host -d -t container ID
+sudo docker run --net=host -d -t image ID
 ```
 
+## To check if the apache2 is running correctly just go to you browser
+```
+http://development.local
+```
 
-## Just folow the instruction on my Docker hub to use this docker container with apache server
+# For using it without VM you can do
+
+## install docker on ubuntu 
+
+```
+sudo apt-get install docker.io -y
+```
+
+##  Add this for docker interface network start to using it for apache
+```
+sudo echo 'auto docker0
+iface docker0 inet static
+      address 192.168.10.102
+      netmask 255.255.255.0' >> /etc/network/interfaces
+```
+
+## Put the interface up for docker
+```
+sudo ifup docker0
+```
+
+## You can also folow the instruction on my Docker hub to use this docker container with apache server 
+
 ```
 https://hub.docker.com/r/caliari/ubuntu-apache/
 ```
