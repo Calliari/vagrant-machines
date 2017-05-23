@@ -54,13 +54,15 @@ vagrant up
 ## After the VM finish the all the installtions do
 
 pulling the docker container from my docker hub
+
 ```
 sudo docker pull caliari/ubuntu-apache
 ```
 
 ### Find out the image ID with the following CMD
 
-```sudo docker images
+``` 
+sudo docker images
 ```
 
 ### Run the docker container after pulling it
