@@ -85,6 +85,7 @@ sudo apt-get install docker.io -y
 ```
 
 ##  Add this for docker interface network start to using it for apache
+
 ```
 sudo echo 'auto docker0
 iface docker0 inet static
