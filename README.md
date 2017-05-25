@@ -1,6 +1,6 @@
 # vagrant-docker
 
-### Instructions to create a repo from CLI
+### Instructions to create a repo from git CLI on terminal
 
 #### (1) First step - generete the link between local and remote  
 ``` curl -u 'calliari' https://api.github.com/user/repos -d '{"name":"vagrant-docker"}' ```
