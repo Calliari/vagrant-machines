@@ -1,74 +1,36 @@
-# vagrant-docker
+### Vagrant machines
+
+How to use a vagrant machines
+
+In this repo there are vagrant-machines for diffent purposes and tests
+
+Clone this repo, change to the directory where the Vagrantfile is sitting and spin up the virtual-machines.
 
 
-# Using this "vagrant-docker" repo
- ## Instructions
-  * Download and install the following
-  1. vagrant software ===> https://www.vagrantup.com/downloads.html
-  2. virtualbox ===> https://www.virtualbox.org/wiki/Downloads
-
-  ## clone this repo to start working in the VM
-
-  ```
-  git clone https://github.com/Calliari/vagrant-docker.git
-  ```
-
-## Spin up the VM
-The VM will install docker and some other packages
+Useful commands for vagrant
 
 ```
-vagrant up
-```
+vagrant               # check the vagrant CMD
 
-## After the VM finish the all the installtions do
+vagrant global-status # outputs status Vagrant environments for this user
+vagrant status        # outputs status of the vagrant machine
 
-pulling the docker container from my docker hub
+vagrant destroy -f    # destroy the VM
+vagrant up            # initialize the VM
+vagrant ssh           # ssh into VM
 
-```
-sudo docker pull caliari/ubuntu-apache
-```
+vagrant halt          # shotdown or power off the VM
+vagrant up            # initialize the VM
 
-### Find out the image ID with the following CMD
 
-```
-sudo docker images
-```
-
-### Run the docker image after pulling it
+vagrant suspend # hibernate the VM
+vagrant resume  # wake up the VM after supended
 
 ```
-sudo docker run --net=host -d -t image ID
-```
+============================================================
 
-## To check if the apache2 is running correctly just go to you browser
-```
-http://development.local
-```
+## Steps to take to get this working
 
-# For using it without VM you can do
+This is a test vm to be used for testing projects
 
-## install docker on ubuntu
-
-```
-sudo apt-get install docker.io -y
-```
-
-##  Add this for docker interface network start to using it for apache
-
-```
-sudo echo 'auto docker0
-iface docker0 inet static
-      address 192.168.10.102
-      netmask 255.255.255.0' >> /etc/network/interfaces
-```
-
-## Put the interface up for docker
-```
-sudo ifup docker0
-```
-
-## You can also folow the instruction on my Docker hub to use this docker container with apache server
-
-```
-https://hub.docker.com/r/caliari/ubuntu-apache/
-```
+This project has a vagrantfile which contains an configuration for a vm.
