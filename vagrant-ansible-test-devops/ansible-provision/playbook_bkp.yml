@@ -1,0 +1,49 @@
+--- # This is the main playbook in this project
+    # The variables are in the vars directory
+    # read the README.md file for more information about this playbook
+
+  - hosts: webServer, localhost
+    remote_user: ubuntu
+    become: yes
+    become_method: sudo
+
+    # variables
+    vars_files:
+      - vars/vars.yml
+
+    # Install dependencies before start to install the software on the roles
+    pre_tasks:
+      - name: Install these dependencies before all
+        apt_repository: repo={{ item }} state=present update_cache=yes
+        with_items:
+          - ppa:ondrej/php
+          - ppa:webupd8team/java
+
+      # - name: Accept Java 8 License
+      #   become: yes
+      #   debconf: name='oracle-java8-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
+
+      - name: Install dependencies for future Installation on webServer (Ubuntu 16)
+        apt: 
+          name: "{{ item }} "
+          state: present 
+          update_cache: yes
+        with_items:
+          - python-pip
+          - aptitude
+          - python-apt
+          - unzip
+          - python-software-properties
+          - software-properties-common
+          - ca-certificates
+
+      - name: Install dependencies for moosh
+        apt_repository:
+          repo: deb http://ppa.launchpad.net/zabuch/ppa/ubuntu trusty main
+          state: present
+          update_cache: yes
+
+
+    roles:
+      - time_zone
+      - host_facts

@@ -1,0 +1,8 @@
+--- # file: roles/mysql-server/handlers/main.yml
+# restart mysql after Installation 
+  - name: restart mysql
+    service: 
+      name: mysql 
+      state: restarted
+    become: yes
+    become_method: sudo

@@ -1,0 +1,121 @@
+--- 
+  # Example Create git archive from repo
+  - name: Git clone the app project 
+    git:
+      repo: "{{git_reposiroty_to_clone}}"
+      dest: "/var/www/{{ git_reposiroty_to_clone | basename }}"
+      version: "{{ git_branch_or_commit }}"
+      force: yes
+    register: project_status
+
+  # Install python packages
+  - name: Install packages for the project
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+        - python-pip
+        - libmysqlclient-dev
+        - mysql-client-core-5.7
+
+  # Python Flask
+  - name: pip package-management for project
+    pip:
+      name: '{{item}}'
+    with_items:
+      - flask
+      - waitress
+      - flask-mysqldb
+      - mysql-connector-python
+
+  # - name: Create the service for web-app 
+  #   template:
+  #     src: templates/web-app.conf.j2
+  #     dest: "/etc/init/web-app.conf"
+  #     force: yes
+
+  - name: Create a service to run the web-app on the background (1/2)
+    copy:
+      content: |
+        author "OC"
+        description "start the web-app app"
+        version "1.0"
+        
+        start on started networking
+        stop on runlevel [016]
+        
+        limit nofile 1000000 1000000
+        
+        script
+        
+          cd /var/www/{{ git_reposiroty_to_clone | basename }}
+          
+          exec /usr/bin/python /var/www/{{ git_reposiroty_to_clone | basename }}/app.py
+        
+        end script
+        
+        respawn
+
+      dest: /etc/init.d/web-app.conf
+      mode: 0644
+      owner: root
+      group: root
+      remote_src: yes
+
+  - name: Create a service to run the node on the background (2/2)
+    copy:
+      content: |
+
+        [Unit]
+        Description=start the web-app 
+        After=network.target
+        RestartSec=2
+
+        [Service]
+        Type=simple
+        TimeoutStopSec=5
+        KillMode=mixed
+
+        WorkingDirectory=/var/www/{{ git_reposiroty_to_clone | basename }}
+        ExecStart=/usr/bin/python /var/www/flask-blog-app.git/app.py
+        
+        [Install]
+        WantedBy=multi-user.target
+
+      dest: /lib/systemd/system/web-app.service
+      mode: 0644
+      owner: root
+      group: root
+      remote_src: yes
+
+  - name: Enabled web-app
+    systemd:
+      daemon_reload: yes
+      name: web-app
+      enabled: yes
+
+  # - name: Set env var
+  #   lineinfile:
+  #     path: /etc/environment
+  #     line: '{{ item.add }}'
+  #   with_items:
+  #     - { add: "DATABASE_USERNAME={{ MySQL_root_username }}" }
+  #     - { add: "DATABASE_PASSWORD={{ MySQL_root_pass }}" }
+  #     - { add: "DATABASE_HOST=192.168.50.10" }
+  #   remote_user: root
+
+  - name: Replace the variable to connect to the db
+    replace:
+      dest: "/var/www/{{ git_reposiroty_to_clone | basename }}/app.py"
+      regexp: "{{ item.regexp }}"
+      replace: "{{ item.replace }}"
+    with_items:
+      - { regexp: "DATABASE_HOST", replace: "{{MySQL_host}}" }
+      - { regexp: "DATABASE_USERNAME", replace: "{{MySQL_root_username}}" }
+      - { regexp: "DATABASE_PASSWORD", replace: "{{MySQL_root_pass}}" }
+      - { regexp: "DATABASE_NAME", replace: "{{MySQL_database_name}}" }
+
+  - name: start web-app
+    command: service web-app restart
+    when: project_status.changed

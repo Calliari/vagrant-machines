@@ -1,0 +1,64 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# vagrant-vbguest: automatically installs the host's VirtualBox Guest Additions on the guest system
+# vagrant-hostsupdater: automatically adds an entry to your /etc/hosts file on the host systexit
+# vagrant-hostmanager: automatically manages the hosts file on guest machines (and optionally the host). Its goal is to enable resolution of multi-machine environments 
+required_plugins = ["vagrant-vbguest", "vagrant-hostsupdater", "vagrant-hostmanager"]
+required_plugins.each do |plugin|
+  if plugin.empty? || plugin.strip.empty? 
+    puts "Plugins list is empty, skipping plugins installation..."
+  else
+      exec "vagrant plugin install #{plugin};vagrant #{ARGV.join(" ")}" unless Vagrant.has_plugin? plugin || ARGV[0] == 'plugin'
+  end
+end
+
+# Array of objects
+vm_servers = [
+    {server_role: "database_server", hostname: "database-server-0", private_network: "192.168.50.10", forwarded_port: 8081 },
+    {server_role: "web_server", hostname: "web-server-1", private_network: "192.168.50.11", forwarded_port: 8081},
+    {server_role: "web_server", hostname: "web-server-2", private_network: "192.168.50.12", forwarded_port: 8082},
+    {server_role: "load_balancer", hostname: "load-balancer-0", private_network: "192.168.50.5", forwarded_port: 8080 },
+]
+
+# ANSIBLE
+# ansible-playbook yml file for provision
+ANSIBLE_PLAYBOOK = "ansible-provision/playbook.yml"
+
+# Ge the total number of "vm_servers"
+total_vm_hosts = vm_servers.length
+
+Vagrant.configure(2) do |config|
+  # Loop over applying the configuration from the 'vm_servers' array objects
+  vm_servers.each do |vm_server|
+    config.vm.define "#{vm_server[:hostname]}" do |sub_config|
+      sub_config.vm.box = "ubuntu/bionic64"
+      sub_config.vm.hostname = "#{vm_server[:hostname]}"
+      sub_config.vm.network :private_network, ip: "#{vm_server[:private_network]}"
+      sub_config.vm.post_up_message = "Run 'vagrant ssh #{vm_server[:hostname]}' to access this VM."
+      sub_config.vm.provision "shell", inline: "mkdir -p /home/vagrant/tmp/;touch /home/vagrant/tmp/web_server_host_ip.txt;truncate -s0 /home/vagrant/tmp/web_server_host_ip.txt"
+  
+      vm_servers.each do |sub_vm_server_cmd|; 
+        if "#{sub_vm_server_cmd[:server_role]}" === "web_server"; 
+            sub_config.vm.provision "shell", inline: "echo #{sub_vm_server_cmd[:private_network]} >> /home/vagrant/tmp/web_server_host_ip.txt"
+        end;
+      end;
+
+      sub_config.vm.provision "ansible_local" do |ansible|
+        ansible.verbose = false # true for debud mode
+        ansible.tags = "#{vm_server[:server_role]}" # tag or only "nodes" group, etc.
+        ansible.groups = {"#{vm_server[:server_role]}": ["#{vm_server[:hostname]}"], "all_servers": ["#{vm_server[:hostname]}"]}
+        ansible.playbook = ANSIBLE_PLAYBOOK
+      end
+      if "#{vm_server[:server_role]}" === "load_balancer"
+        sub_config.hostsupdater.aliases = ["#{vm_server[:hostname]}.local"] # access the vm using alias URL 
+      end
+    end
+  end
+
+  # sync local-folder with vm-folder
+  config.vm.synced_folder 'synced_folder', "/home/vagrant/synced_folder",  disabled: false,  create: true
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_guest = true
+  
+end

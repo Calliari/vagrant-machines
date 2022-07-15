@@ -1,0 +1,21 @@
+--- 
+    # https://www.mysqltutorial.org/mysql-delete-statement.aspx
+
+  - name: "Create a new database with name {{ MySQL_database_name }}"
+    mysql_db: name="{{ MySQL_database_name }}" state=present login_password="{{ MySQL_root_pass }}" login_user="{{ MySQL_root_username }}"
+
+  - name: Send database file to remote
+    template:
+      src: templates/blog.sql
+      dest: "/tmp/blog.sql"
+    register: database_file
+
+  - name: Import project database
+    mysql_db:
+      state: import
+      login_user: '{{MySQL_root_username}}'
+      login_password: '{{MySQL_root_pass}}'
+      name: '{{MySQL_database_name}}'
+      target: /tmp/blog.sql
+    when: database_file.changed
+

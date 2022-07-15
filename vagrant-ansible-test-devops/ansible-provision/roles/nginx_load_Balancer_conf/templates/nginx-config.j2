@@ -1,0 +1,32 @@
+# Define which servers to include in the load balancing http block - round-robin algorithm balances the number of requests equally by default.
+upstream backend_web_servers {
+  server web-server-1;
+  server web-server-2;
+}
+
+# The server accepts all traffic to port 80 and passes it to the upstream as a load balancing. 
+server {
+   listen 80; 
+   server_name load-balancer-0.local;
+
+    access_log /var/log/nginx/load-balancer-0.local.access.log;
+    error_log /var/log/nginx/load-balancer-0.local.error.log error;
+
+   location / {
+         proxy_pass http://backend_web_servers;
+   }
+
+}
+
+
+# # The server accepts all traffic to port 443 and passes it to the upstream as a load balancing. 
+# server {
+#    listen 443 ssl;
+#    server_name _ ;
+#    ssl_certificate /etc/letsencrypt/live/domain_name/cert.pem;
+#    ssl_certificate_key /etc/letsencrypt/live/domain_name/privkey.pem;
+#    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+#    location / {
+#       proxy_pass http://backend_web_servers;
+#    }
+# }

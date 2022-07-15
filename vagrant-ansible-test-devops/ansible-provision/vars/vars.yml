@@ -1,0 +1,29 @@
+---
+nginx_webapp_url: web-app.local
+
+# paste the git repo address to clone ino this server
+git_reposiroty_to_clone: https://github.com/Calliari/flask-blog-app.git
+git_branch_or_commit: mysql
+
+# Users that have ssh access to bastion host
+add_users_to_admin_gp:
+  ut:
+    username: ubuntu
+  vg:
+    username: vagrant
+  jk:
+    username: jack
+  bb:
+    username: bob
+  bil:
+    username: bil
+
+# mysql root username and password
+# root username must be 'root'
+MySQL_root_username: root
+MySQL_root_pass: vg-toor
+MySQL_database_name: blog
+MySQL_host: 192.168.50.10
+
+
+

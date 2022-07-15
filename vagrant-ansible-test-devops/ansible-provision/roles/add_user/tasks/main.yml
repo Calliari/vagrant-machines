@@ -1,0 +1,21 @@
+---
+  - name: Create users and Add the user to the system as well as to 'admin' group
+    user: 
+      name: "{{item.value.username}}"
+      state: present
+      shell: /bin/bash
+      groups: 'admin'
+      append: yes
+      ssh_key_file: "/home/{{item.value.username}}/.ssh/"
+      # password: "{{ user_pass }}"
+      comment: "{{item.value.username}}"
+    with_dict:
+      - "{{add_users_to_admin_gp}}"
+
+  - name: Users in the admin group, to sudo without a password
+    lineinfile:
+      path: /etc/sudoers.d/vagrant
+      state: present
+      insertafter: '^vagrant '
+      line: '%admin ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'

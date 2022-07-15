@@ -1,0 +1,28 @@
+--- # This is the main playbook in this project
+    # The variables are in the vars directory
+    # read the README.md file for more information about this playbook
+
+  # Lits of servers where we want this playbook to run (webServer, loadBalancer)
+  - hosts: all_servers 
+  # - hosts: database_server
+    become: yes
+
+    # variables
+    # display all available information about the host when it is "true"
+    vars:
+      show_facts: false
+
+    # variables
+    vars_files:
+      - vars/vars.yml
+
+    roles:
+      - { role: host_facts, tags: ['always'] } 
+      - { role: add_user, tags: ['always'] } 
+      - { role: install_config_mysql_server, tags: [database_server] }
+      - { role: create_import_database_mysql, tags: [database_server] }
+      - { role: deploy_webapp, tags: ['web_server'] } 
+      - { role: install_nginx, tags: [web_server, load_balancer] }
+      - { role: nginx_web_server_conf, tags: [web_server] }
+      - { role: nginx_load_Balancer_conf, tags: [load_balancer] }
+      - { role: nginx_load_web_tests, tags: [web_server, load_balancer] }

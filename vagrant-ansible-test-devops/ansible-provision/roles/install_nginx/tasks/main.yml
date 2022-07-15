@@ -1,0 +1,13 @@
+--- 
+  - name: Install nginx
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+        - nginx
+    notify:
+      - restart nginx
+    register: install_nginx
+
+

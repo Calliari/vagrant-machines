@@ -1,0 +1,26 @@
+--- 
+  - name: Install nginx
+    apt: 
+      name: '{{ item }}'
+      state: present
+    with_items:
+      - nginx
+    notify:
+      restart nginx
+
+  - name: Nginx configuration
+    template:
+      src: templates/nginx-config.j2
+      dest: "/etc/nginx/sites-available/{{ nginx_webapp_url }}"
+      force: yes
+
+  # - name: Symlinks file for nginx
+  #   file:
+  #     src: "/etc/nginx/sites-available/{{ nginx_webapp_url }}"
+  #     dest: "/etc/nginx/sites-enabled/{{ nginx_webapp_url }}"
+  #     state: link
+
+  # - name: Unlink default configuration for nginx
+  #   file:
+  #     path: /etc/nginx/sites-enabled/default
+  #     state: absent

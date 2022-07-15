@@ -1,0 +1,24 @@
+--- 
+  - name: Re-test Nginx configuration and exit
+    become: yes
+    command: nginx -t
+    changed_when: false
+
+  - name: Test code webservices returns '200 OK' with Content-Type specified
+    uri:
+      url: http://localhost
+      method: GET
+      status_code: 200
+      headers:
+        Content-Type: "text/html"
+
+  - name: Test (Hello World) path returns 'Hello World'
+    action: uri url=http://localhost/hello return_content=yes
+    register: webapp_test_content
+  - fail:
+      msg: 'service is not returing "Hello World" - ERROR'
+    when: "'Hello World' not in webapp_test_content.content"
+
+
+
+
