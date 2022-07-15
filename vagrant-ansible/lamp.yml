@@ -1,0 +1,52 @@
+---
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  become: yes
+
+# This are the variables (packages, services)
+  vars:
+  # Variable packages
+    packages:
+      - apache2
+      - mysql-server
+      - mysql-common
+      - mysql-client
+  # variable services
+    services:
+      - apache2
+      - mysql
+
+
+# This are the tasks to be ran 
+  tasks:
+    # TASK 1
+    - name: Install our packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ packages }}"
+
+    # TASK 2
+    - name: Confirm services are running
+      service:
+        name: "{{ item }}"
+        state: running
+      with_items: "{{ services }}"
+
+    # # This are the commnds we want ansible to run inside tasks for https://ip-address
+    # # TASK 3 CMD
+    # - name: Enable Apache2 modssl
+    #   shell: a2enmod ssl
+
+    # # TASK 4 CMD
+    # - name: Enable Apache2 Default HTTPS site
+    #   shell: a2ensite default-ssl
+
+    # TASK 5
+    # Restart apache
+    - name: Restart Apache 
+      service:
+        name: apache2
+        state: restarted
+
